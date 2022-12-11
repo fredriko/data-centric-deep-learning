@@ -1,3 +1,4 @@
+from collections import Counter
 import torch
 import numpy as np
 import pandas as pd
@@ -22,6 +23,7 @@ class ProductReviewEmbeddings(Dataset):
     super().__init__()
     self.data = pd.read_csv(join(DATA_DIR, lang, f'{split}.csv'))
     self.embedding = torch.load(join(DATA_DIR, lang, f'{split}.pt'))
+    # self.embedding = torch.from_numpy(np.load(join(DATA_DIR, lang, f"{split}.pt"))).float()
     if weights is None:
       weights = torch.ones(self.embedding.size(0))
     assert len(weights) == len(self.embedding)
@@ -30,7 +32,7 @@ class ProductReviewEmbeddings(Dataset):
     self.lang = lang
 
   def get_vocab(self):
-    vocab = defaultdict(lambda: 0)
+  
     # ===============================
     # FILL ME OUT
     # 
@@ -51,6 +53,10 @@ class ProductReviewEmbeddings(Dataset):
     # --
     # Convert tokens to lowercase when updating vocab.
     # ===============================
+    vocab = Counter()
+    for review in self.data.review:
+      vocab.update(review.split())
+      
     return dict(vocab)
 
   def get_labels(self):
@@ -93,7 +99,6 @@ class ProductReviewStream(Dataset):
 
   def get_vocab(self):
     # `defaultdict` can be a helpful utility
-    vocab = defaultdict(lambda: 0)
     # ===============================
     # FILL ME OUT
     # 
@@ -110,6 +115,10 @@ class ProductReviewStream(Dataset):
     # --
     # vocab: dict[str, int]
     # ===============================
+    vocab = Counter()
+    for review in self.data.review:
+      vocab.update(review.split())
+
     return dict(vocab)
 
   def __getitem__(self, index):
